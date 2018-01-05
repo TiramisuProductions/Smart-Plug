@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@color/white"
+    android:layout_height="match_parent">
+
+
+   <ImageView
+       android:layout_width="250dp"
+       android:id="@+id/logo"
+       android:layout_centerInParent="true"
+       android:src="@drawable/logo"
+       android:paddingBottom="30dp"
+       android:layout_height="250dp" />
+
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_below="@+id/logo"
+       android:layout_centerInParent="true"
+       android:id="@+id/welcomenote"
+       android:textColor="@color/colorPrimary"
+       android:fontFamily="@font/font"
+       android:textSize="20sp"
+       android:text="Thank you for purchasing Flash."
+       android:layout_height="wrap_content" />
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_below="@+id/welcomenote"
+       android:layout_centerInParent="true"
+       android:id="@+id/welcomenote2"
+       android:textColor="@color/colorPrimary"
+       android:fontFamily="@font/font"
+       android:textSize="20sp"
+       android:text="Lets Set It Up"
+       android:layout_height="wrap_content" />
+
+</RelativeLayout>
