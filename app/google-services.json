@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "573510338026",
+    "firebase_url": "https://smart-plug-android-app.firebaseio.com",
+    "project_id": "smart-plug-android-app",
+    "storage_bucket": "smart-plug-android-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:573510338026:android:444c118caf10fb10",
+        "android_client_info": {
+          "package_name": "smartplug.app.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "573510338026-9s6i43lfhi1d0mbh50tt2o09pn9mdk2e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfaE6FBl2_TXwACbwRVbJwKl4UReRU0MU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
