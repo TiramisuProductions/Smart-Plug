@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">Flash</string>
     <string name="firstrun">firstrun</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="no_devices_popup">Lets Setup your First Device</string>
+    <string name="no_devices_content">It Just takes 2 Mins!</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_turn_on_bluetooth">TurnOnBluetoothActivity</string>
 </resources>

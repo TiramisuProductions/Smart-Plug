@@ -23,7 +23,16 @@
         </activity>
         <activity android:name=".AppIntro" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".RegisterActivity" />
+        <activity
+            android:name=".HomeActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".TurnOnDeviceActivity"
+            android:label="@string/title_activity_turn_on_bluetooth"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".BluetoothDevices"></activity>
     </application>
 
 </manifest>

@@ -26,12 +26,18 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,6 +56,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText Uname, Pass;
     private TextView signup;
     private ProgressDialog progressDialog;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
         Uname = (EditText) findViewById(R.id.username_ed);
         Pass = (EditText) findViewById(R.id.password_ed);
         signup = (TextView) findViewById(R.id.signup_txt);
-
+        db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
 
@@ -177,6 +184,32 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+
+    private void fireStoreUpdate(final String uid,String name){
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("name", name);
+        userData.put("hasDevices",false);
+
+
+        db.collection("flash").document(uid)
+                .set(userData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("Newuser", "Error writing document", e);
+                    }
+                });
+
+
+
+    }
+
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d("cola1", "firebaseAuthWithGoogle:" + acct.getId());
 
@@ -194,6 +227,15 @@ public class LoginActivity extends AppCompatActivity {
                             progressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "User Signed In\n" + user.getUid()
                                     + "\n" + user.getEmail() + "\n" + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                            if(auth.getCurrentUser().getDisplayName()!=null){
+
+                                fireStoreUpdate(auth.getUid(),auth.getCurrentUser().getDisplayName());
+                            }
+                            else{
+
+                                fireStoreUpdate(auth.getUid(),"Temp");
+                            }
+
 
                         } else {
                             // If sign in fails, display a message to the user.

@@ -38,6 +38,8 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation 'com.google.android.gms:play-services:11.8.0'
+    implementation'com.google.firebase:firebase-firestore:11.8.0'
+    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
 
 }
 apply plugin: 'com.google.gms.google-services'

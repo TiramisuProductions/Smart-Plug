@@ -2,6 +2,7 @@ package smartplug.app.myapplication;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -56,5 +57,6 @@ public class AppIntro extends IntroActivity {
 
         editor.putBoolean(TAGS.firsttime,false);
         editor.commit();
+        startActivity(new Intent(this,MainActivity.class));
     }
 }
