@@ -47,10 +47,7 @@ public class AppIntro extends IntroActivity {
                 .permission(Manifest.permission.CAMERA)
                 .build());
 
-
-
     }
-
 
     @Override
     protected void onStop() {
