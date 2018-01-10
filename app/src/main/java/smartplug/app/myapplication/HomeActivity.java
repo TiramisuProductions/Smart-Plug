@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -25,6 +26,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,7 +40,12 @@ public class HomeActivity extends AppCompatActivity
     private static final int REQUEST_CODE_BLUETOOTH_ON = 1313;
     private ProgressDialog deviceDialog;
     FirebaseFirestore db;
-    FirebaseAuth auth;
+    FirebaseAuth auth1;
+
+
+    private NavigationView navigationView;
+    private View navHeader;
+    private TextView nameHeader, emailHeader;
 
     /**
      * Bluetooth device discovery time，second。
@@ -49,22 +56,31 @@ public class HomeActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        navigationView = (NavigationView)findViewById(R.id.nav_view);
+        navHeader = navigationView.getHeaderView(0);
+        nameHeader = (TextView)navHeader.findViewById(R.id.username_nav_header);
+        emailHeader = (TextView)navHeader.findViewById(R.id.email_nav_header);
+
         setSupportActionBar(toolbar);
         toolbar.setTitle("My Devices");
-        auth = FirebaseAuth.getInstance();
+
         db = FirebaseFirestore.getInstance();
+        auth1 = FirebaseAuth.getInstance();
 
-     //   displayFirstTimeUserDialog();
-deviceList();
 
+        nameHeader.setText(auth1.getCurrentUser().getDisplayName());
+        emailHeader.setText(auth1.getCurrentUser().getEmail());
+
+        //displayFirstTimeUserDialog();
+        deviceList();
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
             }
         });
 
@@ -79,9 +95,8 @@ deviceList();
     }
 
 
-    public void deviceList()
-    {
-        deviceDialog=new ProgressDialog(this);
+    public void deviceList() {
+        deviceDialog = new ProgressDialog(this);
         deviceDialog.setMessage("Getting Your Devices");
         deviceDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         deviceDialog.setIndeterminate(false);
@@ -90,25 +105,20 @@ deviceList();
         deviceDialog.setCancelable(false);
         deviceDialog.show();
 
-        db.collection("flash").document(auth.getUid()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        db.collection("flash").document(auth1.getUid()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-          Log.d("hola",documentSnapshot.getData().get("hasDevices").toString());
-                if(Boolean.valueOf(documentSnapshot.getData().get("hasDevices").toString())==false){
+                Log.d("hola", documentSnapshot.getData().get("hasDevices").toString());
+                if (Boolean.valueOf(documentSnapshot.getData().get("hasDevices").toString()) == false) {
                     deviceDialog.cancel();
-                     displayFirstTimeUserDialog();
+                    displayFirstTimeUserDialog();
                 }
             }
         });
-
-
-
-
     }
 
 
-
-    private void turnOnBluetoothDialog(){
+    private void turnOnBluetoothDialog() {
         new MaterialDialog.Builder(this).onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -122,12 +132,13 @@ deviceList();
                 .negativeText("No")
                 .show();
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 Toast.makeText(this, "Bluetooth enabled", Toast.LENGTH_LONG).show();
-                startActivity(new Intent(HomeActivity.this,TurnOnDeviceActivity.class));
+                startActivity(new Intent(HomeActivity.this, TurnOnDeviceActivity.class));
 
 
             } else if (resultCode == RESULT_CANCELED) {
@@ -137,10 +148,7 @@ deviceList();
     }
 
 
-
-
-
-    private void displayFirstTimeUserDialog(){
+    private void displayFirstTimeUserDialog() {
         new MaterialDialog.Builder(this)
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
@@ -148,13 +156,11 @@ deviceList();
                         // TODO
 
                         if ((BluetoothManager.isBluetoothSupported())
-                                && (!BluetoothManager.isBluetoothEnabled()))
-                        {
+                                && (!BluetoothManager.isBluetoothEnabled())) {
                             dialog.dismiss();
                             turnOnBluetoothDialog();
-                        }
-                        else{
-                            startActivity(new Intent(HomeActivity.this,TurnOnDeviceActivity.class));
+                        } else {
+                            startActivity(new Intent(HomeActivity.this, TurnOnDeviceActivity.class));
                         }
 
 
@@ -223,6 +229,8 @@ deviceList();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
+
         return true;
     }
 }

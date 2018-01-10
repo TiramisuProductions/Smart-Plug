@@ -7,9 +7,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
 public class TurnOnDeviceActivity extends AppCompatActivity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,8 +19,6 @@ public class TurnOnDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_turn_on_device);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-
 
     }
 
