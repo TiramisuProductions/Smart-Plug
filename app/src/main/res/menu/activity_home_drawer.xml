@@ -3,25 +3,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group android:id="@+id/group_1" android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/nav_devices"
+            android:icon="@drawable/nav_mydevices"
+            android:title="My Devices" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:id="@+id/nav_timers"
+            android:icon="@drawable/nav_timer"
+            android:title="Timers" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
-    </group>
+            android:id="@+id/nav_statistics"
+            android:icon="@drawable/nav_stats"
+            android:title="Statistics" />
 
+    </group>
+<group android:id="@+id/group_2">
     <item android:title="Communicate">
         <menu>
             <item
@@ -29,10 +26,20 @@
                 android:icon="@drawable/ic_menu_share"
                 android:title="Share" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/nav_info"
+                android:icon="@drawable/nav_info"
+                android:title="About" />
         </menu>
     </item>
+</group>
+<group android:id="@+id/group_3" android:checkableBehavior="single">
+    <item android:title="Logout"
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/nav_logout"
+        >
+
+    </item>
+</group>
+
 
 </menu>

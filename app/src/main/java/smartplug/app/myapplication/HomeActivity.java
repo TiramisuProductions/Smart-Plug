@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -33,6 +35,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import smartplug.app.myapplication.fragments.MyDevicesFragment;
+import smartplug.app.myapplication.fragments.StatisticsFragment;
+import smartplug.app.myapplication.fragments.TimerFragment;
+
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -41,7 +47,8 @@ public class HomeActivity extends AppCompatActivity
     private ProgressDialog deviceDialog;
     FirebaseFirestore db;
     FirebaseAuth auth1;
-
+Fragment fragment;
+    Toolbar toolbar;
 
     private NavigationView navigationView;
     private View navHeader;
@@ -57,17 +64,18 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         navigationView = (NavigationView)findViewById(R.id.nav_view);
         navHeader = navigationView.getHeaderView(0);
         nameHeader = (TextView)navHeader.findViewById(R.id.username_nav_header);
         emailHeader = (TextView)navHeader.findViewById(R.id.email_nav_header);
 
         setSupportActionBar(toolbar);
-        toolbar.setTitle("My Devices");
 
         db = FirebaseFirestore.getInstance();
         auth1 = FirebaseAuth.getInstance();
+
+toolbar.setTitle("My Devices");
 
 
         nameHeader.setText(auth1.getCurrentUser().getDisplayName());
@@ -77,12 +85,7 @@ public class HomeActivity extends AppCompatActivity
         deviceList();
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            }
-        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -92,6 +95,14 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(0).setChecked(true);
+        fragment = new MyDevicesFragment();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.content_home, fragment);
+        ft.commit();
+
+
+
     }
 
 
@@ -167,6 +178,7 @@ public class HomeActivity extends AppCompatActivity
                     }
                 })
                 .cancelable(false)
+                .icon(getResources().getDrawable(R.drawable.nav_mydevices))
                 .title(R.string.no_devices_popup)
                 .content(R.string.no_devices_content)
                 .positiveText("Okay")
@@ -185,46 +197,44 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
-        return super.onOptionsItemSelected(item);
-    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+
+         fragment = null;
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_devices) {
+            fragment = new MyDevicesFragment();
+            toolbar.setTitle("My Devices");
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_timers) {
+            fragment = new TimerFragment();
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
+            toolbar.setTitle("Timers");
+        } else if (id == R.id.nav_statistics) {
+            toolbar.setTitle("Statistics");
+            fragment = new StatisticsFragment();
 
         } else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_info) {
 
+        }
+        else if(id==R.id.nav_logout){
+            auth1.signOut();
+            startActivity(new Intent(this,MainActivity.class));
+        }
+
+        if (fragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.content_home, fragment);
+            ft.commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
