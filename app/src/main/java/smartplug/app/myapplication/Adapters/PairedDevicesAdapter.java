@@ -1,4 +1,4 @@
-package smartplug.app.myapplication;
+package smartplug.app.myapplication.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import smartplug.app.myapplication.Models.PairedDevices;
+import smartplug.app.myapplication.R;
 
 /**
  * Created by Siddhant Naique on 09-01-2018.

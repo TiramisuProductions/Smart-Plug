@@ -7,10 +7,31 @@
     android:padding="20dp"
     tools:context="smartplug.app.myapplication.BluetoothDevices">
 
+    <TextView
+        android:id="@+id/paired_txt"
+        android:text="Paired Devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view_paired_devices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/paired_txt"
         android:scrollbars="vertical" />
+    <TextView
+        android:id="@+id/available_txt"
+        android:layout_below="@+id/recycler_view_paired_devices"
+        android:text="Available Devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view_found_devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/available_txt"
+        android:scrollbars="vertical"/>
 
 </RelativeLayout>

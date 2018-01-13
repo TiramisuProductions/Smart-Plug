@@ -1,4 +1,4 @@
-package smartplug.app.myapplication;
+package smartplug.app.myapplication.Models;
 
 /**
  * Created by Siddhant Naique on 09-01-2018.
