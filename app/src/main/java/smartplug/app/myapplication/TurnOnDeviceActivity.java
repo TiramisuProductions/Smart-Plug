@@ -18,6 +18,7 @@ public class TurnOnDeviceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_turn_on_device);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Turn on your smart device");
         setSupportActionBar(toolbar);
 
     }

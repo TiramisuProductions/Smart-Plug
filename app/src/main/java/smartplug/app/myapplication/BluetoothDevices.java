@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -52,6 +53,10 @@ public class BluetoothDevices extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_devices);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Available Devices");
+        setSupportActionBar(toolbar);
+
         refes = (Button)findViewById(R.id.refresh);
 
         refes.setOnClickListener(new View.OnClickListener() {
@@ -60,7 +65,6 @@ public class BluetoothDevices extends AppCompatActivity {
                 foundDevices();
             }
         });
-
 
 
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
