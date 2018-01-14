@@ -1,7 +1,9 @@
 package smartplug.app.myapplication;
 
 import android.*;
+import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,7 +31,7 @@ import smartplug.app.myapplication.Models.FoundDevices;
 import smartplug.app.myapplication.Models.PairedDevices;
 
 public class BluetoothDevices extends AppCompatActivity {
-    //ListView devicelist;
+    Button refes;
 
     private BluetoothAdapter myBluetooth = null;
     private Set<BluetoothDevice> pairedDeviceset;
@@ -50,7 +52,16 @@ public class BluetoothDevices extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_devices);
 
-        bluetoothPermission();
+        refes = (Button)findViewById(R.id.refresh);
+
+        refes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                foundDevices();
+            }
+        });
+
+
 
         myBluetooth = BluetoothAdapter.getDefaultAdapter();
         if (myBluetooth == null) {
@@ -80,6 +91,8 @@ public class BluetoothDevices extends AppCompatActivity {
         recyclerViewPairedDevices.setAdapter(pairedDevicesAdapter);
 
         //Found Recycler and Adapter
+        recyclerViewFoundDevices = (RecyclerView) findViewById(R.id.recycler_view_found_devices);
+
 
 
     }
@@ -100,10 +113,10 @@ public class BluetoothDevices extends AppCompatActivity {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     private void foundDevices() {
-
-
-        Toast.makeText(getApplicationContext(), "insidefound", Toast.LENGTH_SHORT).show();
+        bluetoothPermission();
+        foundDevicesList1.clear();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -115,52 +128,64 @@ public class BluetoothDevices extends AppCompatActivity {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                Toast.makeText(getApplicationContext(), "insidefound2", Toast.LENGTH_SHORT).show();
-                String action = intent.getAction();
+                int signal = 0;
 
+                String action = intent.getAction();
 
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 
-                    Toast.makeText(getApplicationContext(), "Device found", Toast.LENGTH_SHORT).show();
+
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
+                    if (foundDevicesList1.size() == 0){
+                        fd = new FoundDevices(device.getName(), device.getAddress());
+                        foundDevicesList1.add(fd);
 
+                    }
+                    else {
+                        try {
 
-//                    fd.setFoundDeviceName(device.getName());
-                    Log.d("croco", "" + device.getName());
-                    //fd.setFoundDeviceAddress(device.getAddress());
+                            for (FoundDevices foundD : foundDevicesList1) {
 
-                    fd = new FoundDevices(device.getName(), device.getAddress());
-                    foundDevicesList1.add(fd);
+                                if (foundD.getFoundDeviceAddress().equals(device.getAddress())) {
 
-                    tempDevices = device.getName() + "\n" + device.getAddress();
+                                    signal=1;
+                                }
+                            }
+                            if(signal == 0){
+                                fd = new FoundDevices(device.getName(), device.getAddress());
+                                foundDevicesList1.add(fd);
 
-                    Toast.makeText(getApplicationContext(), "" + tempDevices + "\n" + rssi, Toast.LENGTH_SHORT).show();
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    BluetoothClass bluetoothClass = device.getBluetoothClass();
+                    int deviceClass = bluetoothClass.getMajorDeviceClass();
 
-                    recyclerViewFoundDevices = (RecyclerView) findViewById(R.id.recycler_view_found_devices);
-                    foundDeviceAdapter = new FoundDeviceAdapter(context, foundDevicesList1);
-                    RecyclerView.LayoutManager manager = new LinearLayoutManager(context);
-                    recyclerViewFoundDevices.setLayoutManager(manager);
-                    recyclerViewFoundDevices.setItemAnimator(new DefaultItemAnimator());
-                    recyclerViewFoundDevices.setAdapter(foundDeviceAdapter);
+                    //if(deviceClass == BluetoothClass.Device.Major.AUDIO_VIDEO)
 
+                    tempDevices = device.getName() + "\n" + device.getAddress()+"\n"+device.getBluetoothClass()+"\n"+device.getType()+"\n"+ device.getBondState();
+                    Toast.makeText(getApplicationContext(),"run : "+tempDevices,Toast.LENGTH_SHORT).show();
                 }
+
+                foundDeviceAdapter = new FoundDeviceAdapter(context, foundDevicesList1);
+                RecyclerView.LayoutManager manager = new LinearLayoutManager(context);
+                recyclerViewFoundDevices.setLayoutManager(manager);
+                recyclerViewFoundDevices.setItemAnimator(new DefaultItemAnimator());
+                recyclerViewFoundDevices.removeAllViews();
+                recyclerViewFoundDevices.setAdapter(foundDeviceAdapter);
             }
         };
 
 
         registerReceiver(mReceiver, filter);
         myBluetooth.startDiscovery();
-        if (myBluetooth.isDiscovering()) {
-
-            myBluetooth.cancelDiscovery();
-            myBluetooth.startDiscovery();
-        }
-
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+
+    @TargetApi(Build.VERSION_CODES.M)
     public void bluetoothPermission() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
@@ -173,9 +198,8 @@ public class BluetoothDevices extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
-        //myBluetooth.cancelDiscovery();
+    protected void onStop() {
+        super.onStop();
+        myBluetooth.cancelDiscovery();
     }
 }
