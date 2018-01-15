@@ -164,7 +164,7 @@ toolbar.setTitle("My Devices");
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(MaterialDialog dialog, DialogAction which) {
-                        // TODO
+
 
                         if ((BluetoothManager.isBluetoothSupported())
                                 && (!BluetoothManager.isBluetoothEnabled())) {
@@ -173,7 +173,6 @@ toolbar.setTitle("My Devices");
                         } else {
                             startActivity(new Intent(HomeActivity.this, TurnOnDeviceActivity.class));
                         }
-
 
                     }
                 })

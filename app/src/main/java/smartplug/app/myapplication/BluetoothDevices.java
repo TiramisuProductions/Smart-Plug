@@ -44,6 +44,8 @@ public class BluetoothDevices extends AppCompatActivity {
     private FoundDeviceAdapter foundDeviceAdapter;
     Context context;
     FoundDevices fd;
+    BluetoothDevice device;
+    int signal;
 
     String tempDevices;
 
@@ -57,11 +59,14 @@ public class BluetoothDevices extends AppCompatActivity {
         toolbar.setTitle("Available Devices");
         setSupportActionBar(toolbar);
 
-        refes = (Button)findViewById(R.id.refresh);
+        refes = (Button) findViewById(R.id.refresh);
 
         refes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(myBluetooth.isDiscovering()){
+                    myBluetooth.cancelDiscovery();
+                }
                 foundDevices();
             }
         });
@@ -98,7 +103,6 @@ public class BluetoothDevices extends AppCompatActivity {
         recyclerViewFoundDevices = (RecyclerView) findViewById(R.id.recycler_view_found_devices);
 
 
-
     }
 
     private void pairedDevicesList() {
@@ -132,46 +136,24 @@ public class BluetoothDevices extends AppCompatActivity {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                int signal = 0;
+                signal = 0;
 
                 String action = intent.getAction();
-
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 
 
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    if (foundDevicesList1.size() == 0){
-                        fd = new FoundDevices(device.getName(), device.getAddress());
-                        foundDevicesList1.add(fd);
+                    if (device.getBondState() != BluetoothDevice.BOND_BONDED)
+                    {checkDuplicateBtDevice();}
 
-                    }
-                    else {
-                        try {
-
-                            for (FoundDevices foundD : foundDevicesList1) {
-
-                                if (foundD.getFoundDeviceAddress().equals(device.getAddress())) {
-
-                                    signal=1;
-                                }
-                            }
-                            if(signal == 0){
-                                fd = new FoundDevices(device.getName(), device.getAddress());
-                                foundDevicesList1.add(fd);
-
-                            }
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                    }
                     BluetoothClass bluetoothClass = device.getBluetoothClass();
                     int deviceClass = bluetoothClass.getMajorDeviceClass();
 
-                    //if(deviceClass == BluetoothClass.Device.Major.AUDIO_VIDEO)
+                    String btClass = findBtClass(deviceClass);
 
-                    tempDevices = device.getName() + "\n" + device.getAddress()+"\n"+device.getBluetoothClass()+"\n"+device.getType()+"\n"+ device.getBondState();
-                    Toast.makeText(getApplicationContext(),"run : "+tempDevices,Toast.LENGTH_SHORT).show();
+                    tempDevices = device.getName() + "\n" + device.getAddress() + "\n" + btClass + "\n" + device.getType() + "\n" + device.getBondState();
+                    Toast.makeText(getApplicationContext(), "run : " + tempDevices, Toast.LENGTH_SHORT).show();
                 }
 
                 foundDeviceAdapter = new FoundDeviceAdapter(context, foundDevicesList1);
@@ -183,9 +165,34 @@ public class BluetoothDevices extends AppCompatActivity {
             }
         };
 
-
         registerReceiver(mReceiver, filter);
         myBluetooth.startDiscovery();
+    }
+
+    public void checkDuplicateBtDevice(){
+        if (foundDevicesList1.size() == 0) {
+            fd = new FoundDevices(device.getName(), device.getAddress());
+            foundDevicesList1.add(fd);
+
+        } else {
+            try {
+
+                for (FoundDevices foundD : foundDevicesList1) {
+
+                    if (foundD.getFoundDeviceAddress().equals(device.getAddress())) {
+
+                        signal = 1;
+                    }
+                }
+                if (signal == 0) {
+                    fd = new FoundDevices(device.getName(), device.getAddress());
+                    foundDevicesList1.add(fd);
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -201,9 +208,41 @@ public class BluetoothDevices extends AppCompatActivity {
         }
     }
 
+    //to check the (class)type of device
+    private String findBtClass(int major) {
+        switch (major) {
+            case BluetoothClass.Device.Major.AUDIO_VIDEO:
+                return "AUDIO_VIDEO";
+            case BluetoothClass.Device.Major.COMPUTER:
+                return "COMPUTER";
+            case BluetoothClass.Device.Major.HEALTH:
+                return "HEALTH";
+            case BluetoothClass.Device.Major.IMAGING:
+                return "IMAGING";
+            case BluetoothClass.Device.Major.MISC:
+                return "MISC";
+            case BluetoothClass.Device.Major.NETWORKING:
+                return "NETWORKING";
+            case BluetoothClass.Device.Major.PERIPHERAL:
+                return "PERIPHERAL";
+            case BluetoothClass.Device.Major.PHONE:
+                return "PHONE";
+            case BluetoothClass.Device.Major.TOY:
+                return "TOY";
+            case BluetoothClass.Device.Major.UNCATEGORIZED:
+                return "UNCATEGORIZED";
+            case BluetoothClass.Device.Major.WEARABLE:
+                return "WEARABLE";
+            default:
+                return "unknown";
+        }
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
         myBluetooth.cancelDiscovery();
     }
+
+
 }

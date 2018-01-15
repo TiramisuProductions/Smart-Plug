@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical"
+    tools:context="smartplug.app.myapplication.BluetoothDevices">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/tb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tb"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/paired_txt"
+            android:text="Paired Devices"
+            android:textColor="#90caf9"
+            android:textSize="25dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view_paired_devices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/paired_txt"
+            android:scrollbars="vertical" />
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="fill_parent"
+            android:layout_marginTop="20dp"
+            android:layout_below="@+id/recycler_view_paired_devices"
+            android:layout_height="2dp"
+            android:background="#c0c0c0"/>
+
+
+        <TextView
+            android:id="@+id/available_txt"
+            android:layout_below="@+id/line"
+            android:text="Available Devices"
+            android:layout_marginTop="20dp"
+            android:textColor="#90caf9"
+            android:textSize="25dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view_found_devices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/available_txt"
+            android:scrollbars="vertical"/>
+        <Button
+            android:id="@+id/refresh"
+            android:text="refresh"
+            android:layout_marginTop="20dp"
+            android:background="#64b5f6"
+            android:layout_below="@+id/recycler_view_found_devices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
