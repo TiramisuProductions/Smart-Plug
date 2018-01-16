@@ -253,10 +253,3 @@ public class BluetoothDevices extends AppCompatActivity {
 
 
 }
-/*
-    * fefhewufhwuef
-    * efiuwbfdsfius
-    * nsfsndfjksdnfkjsd
-    * sfsnfkjsnbdf
-    * dfosdfjdsnkfds
-    * dfodsnfkjdsnfkj*/
