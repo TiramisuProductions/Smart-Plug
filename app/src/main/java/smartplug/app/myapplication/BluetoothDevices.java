@@ -243,6 +243,20 @@ public class BluetoothDevices extends AppCompatActivity {
         super.onStop();
         myBluetooth.cancelDiscovery();
     }
+    /*
+    * fefhewufhwuef
+    * efiuwbfdsfius
+    * nsfsndfjksdnfkjsd
+    * sfsnfkjsnbdf
+    * dfosdfjdsnkfds
+    * dfodsnfkjdsnfkj*/
 
 
 }
+/*
+    * fefhewufhwuef
+    * efiuwbfdsfius
+    * nsfsndfjksdnfkjsd
+    * sfsnfkjsnbdf
+    * dfosdfjdsnkfds
+    * dfodsnfkjdsnfkj*/
