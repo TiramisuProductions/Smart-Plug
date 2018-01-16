@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -18,19 +19,42 @@ import smartplug.app.myapplication.R;
  * Created by Siddhant Naique on 13-01-2018.
  */
 
-public class FoundDeviceAdapter extends RecyclerView.Adapter<FoundDeviceAdapter.MyViewHolderF> {
+
+public class FoundDeviceAdapter extends
+        RecyclerView.Adapter<FoundDeviceAdapter.MyViewHolderF> {
 
     Context context;
     ArrayList<FoundDevices> foundDevicelist = new ArrayList<>();
 
-    public class MyViewHolderF extends RecyclerView.ViewHolder{
+    public class MyViewHolderF extends RecyclerView.ViewHolder implements
+    View.OnClickListener, View.OnLongClickListener{
         TextView Dname, Daddress;
+        private ItemClickListener clickListener;
 
         public MyViewHolderF(View itemView) {
             super(itemView);
 
             Dname = (TextView)itemView.findViewById(R.id.device_nameF);
             Daddress = (TextView)itemView.findViewById(R.id.device_addressF);
+            itemView.setTag(itemView);
+            itemView.setOnClickListener(this);
+            itemView.setOnClickListener(this);
+
+        }
+
+        public void setClickListener(ItemClickListener itemClickListener){
+            this.clickListener = itemClickListener;
+        }
+
+        @Override
+        public void onClick(View v) {
+            clickListener.onClick(itemView, getPosition(),false);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            clickListener.onClick(itemView, getPosition(),false);
+            return true;
         }
     }
 
@@ -49,11 +73,23 @@ public class FoundDeviceAdapter extends RecyclerView.Adapter<FoundDeviceAdapter.
 
     @Override
     public void onBindViewHolder(MyViewHolderF holder, int position) {
-       // FoundDevices fd = foundDevicelist.get(position);
-        FoundDevices fd = foundDevicelist.get(position);
+
+        final FoundDevices fd = foundDevicelist.get(position);
         holder.Dname.setText(fd.getFoundDeviceName());
         holder.Daddress.setText(fd.getFoundDeviceAddress());
 
+        holder.setClickListener(new ItemClickListener() {
+            @Override
+            public void onClick(View view, int position, boolean isLongClick) {
+
+                if (isLongClick) {
+                    //Toast.makeText(context, "#" + position + " - " + fd.getFoundDeviceName() + " (Long click)", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "#" + position + " - " + fd.getFoundDeviceName(), Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
     }
 
     @Override
@@ -61,4 +97,7 @@ public class FoundDeviceAdapter extends RecyclerView.Adapter<FoundDeviceAdapter.
         return foundDevicelist.size();
     }
 
+    public interface ItemClickListener {
+        void onClick(View view, int position, boolean isLongClick);
+    }
 }
