@@ -49,6 +49,7 @@ public class BluetoothDevices extends AppCompatActivity {
 
     String tempDevices;
 
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
