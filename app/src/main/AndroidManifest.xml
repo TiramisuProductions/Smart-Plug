@@ -3,8 +3,8 @@
     package="smartplug.app.myapplication">
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -16,7 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".BluetoothActivity2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,7 +34,9 @@
             android:name=".TurnOnDeviceActivity"
             android:label="@string/title_activity_turn_on_bluetooth"
             android:theme="@style/AppTheme" />
-        <activity android:name=".BluetoothDevices"></activity>
+        <activity android:name=".BluetoothDevices" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".BluetoothDevices2"></activity>
     </application>
 
 </manifest>
