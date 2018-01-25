@@ -45,6 +45,9 @@ public class BluetoothDevices extends AppCompatActivity {
     Context context;
     FoundDevices fd;
     BluetoothDevice device;
+
+    public ArrayList<BluetoothDevice> ADlist = new ArrayList<>();
+
     int signal;
 
     String tempDevices;
@@ -65,10 +68,12 @@ public class BluetoothDevices extends AppCompatActivity {
         refes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(myBluetooth.isDiscovering()){
+                if (myBluetooth.isDiscovering()) {
                     myBluetooth.cancelDiscovery();
                 }
                 foundDevices();
+                pairedDevicesList1.clear();
+                pairedDevicesList();
             }
         });
 
@@ -102,13 +107,15 @@ public class BluetoothDevices extends AppCompatActivity {
 
         //Found Recycler and Adapter
         recyclerViewFoundDevices = (RecyclerView) findViewById(R.id.recycler_view_found_devices);
-
-
     }
 
     private void pairedDevicesList() {
+        pairedDevicesList1.clear();
+
+        //Toast.makeText(getApplicationContext(), "Paired Bluetooth Devices", Toast.LENGTH_LONG).show();
+
         pairedDeviceset = myBluetooth.getBondedDevices();
-        //ArrayList pairedList = new ArrayList();
+
         PairedDevices pd;
 
         if (pairedDeviceset.size() > 0) {
@@ -120,12 +127,14 @@ public class BluetoothDevices extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
         }
+        //pairedDeviceset.clear();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
     private void foundDevices() {
         bluetoothPermission();
         foundDevicesList1.clear();
+        ADlist.clear();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -138,15 +147,15 @@ public class BluetoothDevices extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 signal = 0;
-
                 String action = intent.getAction();
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 
 
                     device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    if (device.getBondState() != BluetoothDevice.BOND_BONDED)
-                    {checkDuplicateBtDevice();}
+                    if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                        checkDuplicateBtDevice();
+                    }
 
                     BluetoothClass bluetoothClass = device.getBluetoothClass();
                     int deviceClass = bluetoothClass.getMajorDeviceClass();
@@ -154,10 +163,10 @@ public class BluetoothDevices extends AppCompatActivity {
                     String btClass = findBtClass(deviceClass);
 
                     tempDevices = device.getName() + "\n" + device.getAddress() + "\n" + btClass + "\n" + device.getType() + "\n" + device.getBondState();
-                    Toast.makeText(getApplicationContext(), "run : " + tempDevices, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "run : " + tempDevices, Toast.LENGTH_SHORT).show();
                 }
 
-                foundDeviceAdapter = new FoundDeviceAdapter(context, foundDevicesList1);
+                foundDeviceAdapter = new FoundDeviceAdapter(context, foundDevicesList1, ADlist);
                 RecyclerView.LayoutManager manager = new LinearLayoutManager(context);
                 recyclerViewFoundDevices.setLayoutManager(manager);
                 recyclerViewFoundDevices.setItemAnimator(new DefaultItemAnimator());
@@ -170,25 +179,24 @@ public class BluetoothDevices extends AppCompatActivity {
         myBluetooth.startDiscovery();
     }
 
-    public void checkDuplicateBtDevice(){
+    public void checkDuplicateBtDevice() {
         if (foundDevicesList1.size() == 0) {
             fd = new FoundDevices(device.getName(), device.getAddress());
             foundDevicesList1.add(fd);
+            ADlist.add(device);
 
         } else {
             try {
 
                 for (FoundDevices foundD : foundDevicesList1) {
-
                     if (foundD.getFoundDeviceAddress().equals(device.getAddress())) {
-
                         signal = 1;
                     }
                 }
                 if (signal == 0) {
                     fd = new FoundDevices(device.getName(), device.getAddress());
                     foundDevicesList1.add(fd);
-
+                    ADlist.add(device);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -243,14 +251,6 @@ public class BluetoothDevices extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         myBluetooth.cancelDiscovery();
+
     }
-    /*
-    * fefhewufhwuef
-    * efiuwbfdsfius
-    * nsfsndfjksdnfkjsd
-    * sfsnfkjsnbdf
-    * dfosdfjdsnkfds
-    * dfodsnfkjdsnfkj*/
-
-
 }

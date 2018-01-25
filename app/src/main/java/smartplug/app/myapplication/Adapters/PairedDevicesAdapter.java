@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -47,9 +48,15 @@ public class PairedDevicesAdapter extends RecyclerView.Adapter<PairedDevicesAdap
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        PairedDevices pd = pairedDevicelist.get(position);
+        final PairedDevices pd = pairedDevicelist.get(position);
         holder.Dname.setText(pd.getPairedDeviceName());
         holder.Daddress.setText(pd.getPairedDeviceAddress());
+        holder.Dname.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, ""+pd.getPairedDeviceName(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

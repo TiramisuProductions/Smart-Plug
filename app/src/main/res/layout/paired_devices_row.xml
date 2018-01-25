@@ -9,11 +9,14 @@
         android:layout_height="wrap_content"
         android:textColor="#000"
         android:textSize="16dp"
+        android:padding="15dp"
+        android:background="#efebe9"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/device_address"
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="wrap_content"
         android:layout_below="@+id/device_name"
         android:textColor="#000" />
