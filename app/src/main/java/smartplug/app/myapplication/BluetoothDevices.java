@@ -7,10 +7,12 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -20,14 +22,22 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.jar.*;
 
+import de.greenrobot.event.EventBus;
 import smartplug.app.myapplication.Adapters.FoundDeviceAdapter;
 import smartplug.app.myapplication.Adapters.PairedDevicesAdapter;
+import smartplug.app.myapplication.Models.Device;
 import smartplug.app.myapplication.Models.FoundDevices;
 import smartplug.app.myapplication.Models.PairedDevices;
 
@@ -36,17 +46,19 @@ public class BluetoothDevices extends AppCompatActivity {
 
     private BluetoothAdapter myBluetooth = null;
     private Set<BluetoothDevice> pairedDeviceset;
-    private ArrayList<PairedDevices> pairedDevicesList1 = new ArrayList<>();
-    private ArrayList<FoundDevices> foundDevicesList1 = new ArrayList<>();
+    private ArrayList<BluetoothDevice> pairedDevicesList1 = new ArrayList<>();
+    private ArrayList<BluetoothDevice> foundDevicesList = new ArrayList<>();
 
     private RecyclerView recyclerViewPairedDevices, recyclerViewFoundDevices;
     private PairedDevicesAdapter pairedDevicesAdapter;
     private FoundDeviceAdapter foundDeviceAdapter;
+    private FirebaseFirestore db;
     Context context;
     FoundDevices fd;
     BluetoothDevice device;
-
+    public static String EXTRA_DEVICE_ADDRESS = "device_address";
     public ArrayList<BluetoothDevice> ADlist = new ArrayList<>();
+
 
     int signal;
 
@@ -58,11 +70,11 @@ public class BluetoothDevices extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_devices);
-
+        EventBus.getDefault().register(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Available Devices");
         setSupportActionBar(toolbar);
-
+        db = FirebaseFirestore.getInstance();
         refes = (Button) findViewById(R.id.refresh);
 
         refes.setOnClickListener(new View.OnClickListener() {
@@ -122,7 +134,11 @@ public class BluetoothDevices extends AppCompatActivity {
             for (BluetoothDevice bt : pairedDeviceset) {
 
                 pd = new PairedDevices(bt.getName(), bt.getAddress());
-                pairedDevicesList1.add(pd);
+                if(bt.getName().trim().equals("HC-05"))
+                {
+                    pairedDevicesList1.add(bt);
+                }
+
             }
         } else {
             Toast.makeText(getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
@@ -133,7 +149,7 @@ public class BluetoothDevices extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.M)
     private void foundDevices() {
         bluetoothPermission();
-        foundDevicesList1.clear();
+        foundDevicesList.clear();
         ADlist.clear();
 
         IntentFilter filter = new IntentFilter();
@@ -166,7 +182,7 @@ public class BluetoothDevices extends AppCompatActivity {
                     //Toast.makeText(getApplicationContext(), "run : " + tempDevices, Toast.LENGTH_SHORT).show();
                 }
 
-                foundDeviceAdapter = new FoundDeviceAdapter(context, foundDevicesList1, ADlist);
+                foundDeviceAdapter = new FoundDeviceAdapter(context, foundDevicesList);
                 RecyclerView.LayoutManager manager = new LinearLayoutManager(context);
                 recyclerViewFoundDevices.setLayoutManager(manager);
                 recyclerViewFoundDevices.setItemAnimator(new DefaultItemAnimator());
@@ -180,22 +196,22 @@ public class BluetoothDevices extends AppCompatActivity {
     }
 
     public void checkDuplicateBtDevice() {
-        if (foundDevicesList1.size() == 0) {
+        if (foundDevicesList.size() == 0) {
             fd = new FoundDevices(device.getName(), device.getAddress());
-            foundDevicesList1.add(fd);
+            foundDevicesList.add(device);
             ADlist.add(device);
 
         } else {
             try {
 
-                for (FoundDevices foundD : foundDevicesList1) {
-                    if (foundD.getFoundDeviceAddress().equals(device.getAddress())) {
+                for (BluetoothDevice foundD : foundDevicesList) {
+                    if (foundD.getAddress().equals(device.getAddress())) {
                         signal = 1;
                     }
                 }
                 if (signal == 0) {
                     fd = new FoundDevices(device.getName(), device.getAddress());
-                    foundDevicesList1.add(fd);
+                    foundDevicesList.add(device);
                     ADlist.add(device);
                 }
             } catch (Exception e) {
@@ -215,6 +231,59 @@ public class BluetoothDevices extends AppCompatActivity {
 
             }
         }
+    }
+
+    public void onEvent(EventBusEvent event){
+        // your implementation
+        Toast.makeText(this, event.getMessage(), Toast.LENGTH_SHORT).show();
+        Intent i = new Intent(BluetoothDevices.this, ConnectToBluetoothActivity.class);
+        Log.d("address",event.getDevice().getAddress());
+        i.putExtra(EXTRA_DEVICE_ADDRESS, event.getDevice().getAddress());
+        startActivity(i);
+       /* final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText input = new EditText(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        builder.setTitle("What Would you like to name your device");
+        builder.setView(input);
+        builder.setPositiveButton("Done",null);
+        builder.setNegativeButton("Cancel",null);
+        builder.setCancelable(false);
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        // TODO Do something
+                        if(input.getText().toString().equals("")){
+                            input.setError("Enter a name");
+                        }
+                        else {
+                            Device device = new Device("102",input.getText().toString(),false);
+                            db.collection("flash").document(FirebaseAuth.getInstance().getUid()).collection("devices").add(device);
+                            alert.dismiss();
+                        }
+
+                    }
+                });
+                Button n = alert.getButton(AlertDialog.BUTTON_NEGATIVE);
+                n.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alert.dismiss();
+                    }
+                });
+
+            }
+        });
+
+        alert.show();*/
     }
 
     //to check the (class)type of device

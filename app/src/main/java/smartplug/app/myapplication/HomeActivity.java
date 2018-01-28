@@ -3,6 +3,7 @@ package smartplug.app.myapplication;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,6 +11,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -35,6 +39,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import smartplug.app.myapplication.Adapters.DevicesAdapter;
+import smartplug.app.myapplication.Adapters.PairedDevicesAdapter;
+import smartplug.app.myapplication.Models.Device;
 import smartplug.app.myapplication.fragments.MyDevicesFragment;
 import smartplug.app.myapplication.fragments.StatisticsFragment;
 import smartplug.app.myapplication.fragments.TimerFragment;
@@ -53,12 +64,14 @@ Fragment fragment;
     private NavigationView navigationView;
     private View navHeader;
     private TextView nameHeader, emailHeader;
-
-    /**
+     @BindView(R.id.devices)
+    RecyclerView devicesRecylerView;
+    /** private ArrayList<Device> deviceList = new ArrayList<>();
      * Bluetooth device discovery time，second。
      */
     private static final int BLUETOOTH_DISCOVERABLE_DURATION = 250;
-
+    private DevicesAdapter devicesAdapter;
+    public ArrayList<Device> deviceList = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +82,7 @@ Fragment fragment;
         navHeader = navigationView.getHeaderView(0);
         nameHeader = (TextView)navHeader.findViewById(R.id.username_nav_header);
         emailHeader = (TextView)navHeader.findViewById(R.id.email_nav_header);
-
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
         db = FirebaseFirestore.getInstance();
@@ -123,6 +136,32 @@ toolbar.setTitle("My Devices");
                 if (Boolean.valueOf(documentSnapshot.getData().get("hasDevices").toString()) == false) {
                     deviceDialog.cancel();
                     displayFirstTimeUserDialog();
+
+                }
+                else {
+                    db.collection("flash").document(FirebaseAuth.getInstance().getUid()).collection("devices")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        for (DocumentSnapshot document : task.getResult()) {
+                                            Log.d("flashdevices", document.getId() + " => " + document.getData());
+                                            Device device = document.toObject(Device.class);
+                                            Log.d("flashdevices 2 ", device.getName());
+                                            deviceList.add(device);
+                                        }
+                                        deviceDialog.cancel();
+                                        devicesAdapter = new DevicesAdapter(HomeActivity.this, deviceList);
+                                        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(HomeActivity.this);
+                                        devicesRecylerView.setLayoutManager(mLayoutManager);
+                                        devicesRecylerView.setItemAnimator(new DefaultItemAnimator());
+                                        devicesRecylerView.setAdapter(devicesAdapter);
+                                    } else {
+                                        Log.d("flashdevices", "Error getting documents: ", task.getException());
+                                    }
+                                }
+                            });
                 }
             }
         });

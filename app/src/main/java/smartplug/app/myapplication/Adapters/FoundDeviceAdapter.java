@@ -36,8 +36,8 @@ public class FoundDeviceAdapter extends
 
 
     Context context;
-    ArrayList<FoundDevices> foundDevicelist = new ArrayList<>();
-    ArrayList<BluetoothDevice> ADlist = new ArrayList<>();
+    ArrayList<BluetoothDevice> foundDevicelist = new ArrayList<>();
+
 
 
 
@@ -52,10 +52,9 @@ public class FoundDeviceAdapter extends
         }
     }
 
-    public FoundDeviceAdapter(Context context1, ArrayList<FoundDevices> list1, ArrayList<BluetoothDevice> ADlist1) {
+    public FoundDeviceAdapter(Context context1, ArrayList<BluetoothDevice> list1) {
         this.context = context1;
         this.foundDevicelist = list1;
-        this.ADlist = ADlist1;
         context.registerReceiver(mPairReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
     }
 
@@ -70,17 +69,17 @@ public class FoundDeviceAdapter extends
     @Override
     public void onBindViewHolder(MyViewHolderF holder, final int position) {
 
-        final FoundDevices fd = foundDevicelist.get(position);
-        holder.Dname.setText(fd.getFoundDeviceName());
-        holder.Daddress.setText(fd.getFoundDeviceAddress());
+        final BluetoothDevice fd = foundDevicelist.get(position);
+        holder.Dname.setText(fd.getName());
+        holder.Daddress.setText(fd.getAddress());
         holder.Dname.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, fd.getFoundDeviceName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, fd.getAddress(), Toast.LENGTH_SHORT).show();
 
-                for (BluetoothDevice btd : ADlist) {
-                    if (fd.getFoundDeviceAddress().equals(btd.getAddress())) {
-                        BluetoothDevice device = ADlist.get(position);
+
+
+                        BluetoothDevice device = foundDevicelist.get(position);
 
                         try {
                             Method method = device.getClass().getMethod("createBond", (Class[]) null);
@@ -91,10 +90,10 @@ public class FoundDeviceAdapter extends
                             e.printStackTrace();
                         }
                     }
-                }
-            }
-        });
-    }
+
+            });
+        };
+
 
     @Override
     public int getItemCount() {

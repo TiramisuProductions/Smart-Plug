@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Smart-Plug.iml" filepath="$PROJECT_DIR$/Smart-Plug.iml" />
-      <module fileurl="file://C:\Users\Siddhant Naique\AndroidStudioProjects\New\Smart-Plug\Smart-Plug-Android-App\Smart-Plug.iml" filepath="C:\Users\Siddhant Naique\AndroidStudioProjects\New\Smart-Plug\Smart-Plug-Android-App\Smart-Plug.iml" />
-      <module fileurl="file://D:\Projects\Smart-Plug\Smart-Plug-Android-App.iml" filepath="D:\Projects\Smart-Plug\Smart-Plug-Android-App.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
