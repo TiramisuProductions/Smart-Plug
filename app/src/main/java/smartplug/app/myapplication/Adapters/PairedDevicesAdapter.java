@@ -86,61 +86,13 @@ public class PairedDevicesAdapter extends RecyclerView.Adapter<PairedDevicesAdap
                 String uid = "102";
 
 
-                db.collection("flash").document(FirebaseAuth.getInstance().getUid()).collection("devices")
-                        .whereEqualTo("deviceId", uid)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    Log.d("working","working");
-                                    for (DocumentSnapshot document : task.getResult()) {
-                                        Log.d("devices", document.getId() + " => " + document.getData());
-                                        deviceExist = true;
-                                    }
-                                    if(deviceExist == true)
-                                    {
-                                        Toast.makeText(context,"Device Exist",Toast.LENGTH_LONG).show();
-                                        deviceExist = false;
+
                                         EventBus.getDefault().post(new EventBusEvent("Hello EventBus!",pairedDevicelist.get(position)));
-                                    }
-                                    else{
-
-
-                                      /*  AlertDialog.Builder builder = new AlertDialog.Builder(rootViewContext);
-
-                                        builder.setTitle("You want to delete");
-                                        builder.setMessage("Are you sure?");
-
-                                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                // Do nothing but close the dialog
-
-                                            }
-                                        });
-
-                                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-
-                                                // Do nothing
-                                                dialog.dismiss();
-                                            }
-                                        });
-
-                                        AlertDialog alert = builder.create();
-                                        alert.show();*/
-                                    }
 
 
 
-                                } else {
-                                    Log.d("devices", "Error getting documents: ", task.getException());
-                                }
-                            }
-                        });
+
+
 
             }
         });

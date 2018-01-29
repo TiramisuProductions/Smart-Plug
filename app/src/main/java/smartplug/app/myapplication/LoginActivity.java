@@ -34,13 +34,16 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import smartplug.app.myapplication.Models.User;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -57,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView signup;
     private ProgressDialog progressDialog;
     private FirebaseFirestore db;
+    public static String name = "name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,8 +160,7 @@ public class LoginActivity extends AppCompatActivity {
         //and take the user to profile activity
         if (auth.getCurrentUser() != null) {
             finish();
-            //Toast.makeText(this,""+auth.getCurrentUser().getDisplayName() +"/n" +
-            // ""+usertemp.getEmail()+"\n" +usertemp.getUid(),Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -185,29 +188,35 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-    private void fireStoreUpdate(final String uid,String name){
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("name", name);
-        userData.put("hasDevices",false);
 
 
-        db.collection("flash").document(uid)
-                .set(userData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+
+    private void checkIfUserExist(String email){
+        progressDialog.show();
+        progressDialog.setMessage("Verifying...");
+        db.collection("flash")
+                .whereEqualTo("email",email)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onSuccess(Void aVoid) {
-                        startActivity(new Intent(LoginActivity.this,MainActivity.class));
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("Newuser", "Error writing document", e);
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        progressDialog.cancel();
+                        if (task.isSuccessful()) {
+                            if(task.getResult().size()>0){
+
+                                startActivity(new Intent(LoginActivity.this,HomeActivity.class));
+                                finish();
+                            }
+                            else{
+                       startActivity(new Intent(LoginActivity.this,NewUserRegistration.class).putExtra(name,auth.getCurrentUser().getDisplayName()));
+                            }
+
+
+                        } else {
+                          //  Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
                     }
                 });
-
-
-
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
@@ -224,17 +233,13 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d("cola2", "signInWithCredential:success");
                             user = auth.getCurrentUser();
-                            progressDialog.dismiss();
+                           // progressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "User Signed In\n" + user.getUid()
                                     + "\n" + user.getEmail() + "\n" + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                            if(auth.getCurrentUser().getDisplayName()!=null){
 
-                                fireStoreUpdate(auth.getUid(),auth.getCurrentUser().getDisplayName());
-                            }
-                            else{
 
-                                fireStoreUpdate(auth.getUid(),"Temp");
-                            }
+                            checkIfUserExist(user.getEmail());
+
 
 
                         } else {

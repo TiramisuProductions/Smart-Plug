@@ -6,26 +6,13 @@
     android:layout_height="match_parent"
     android:scrollbars="vertical"
     tools:context="smartplug.app.myapplication.BluetoothDevices">
-<RelativeLayout
+<android.support.constraint.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/tb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+    android:layout_height="wrap_content"
+    android:id="@+id/relativeLayout3">
 
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/toolbar" />
 
-    </android.support.design.widget.AppBarLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tb"
-        android:padding="20dp">
 
         <TextView
             android:id="@+id/paired_txt"
@@ -33,51 +20,69 @@
             android:textColor="#90caf9"
             android:textSize="25dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view_paired_devices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/paired_txt"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/paired_txt" />
 
         <View
             android:id="@+id/line"
             android:layout_width="fill_parent"
             android:layout_marginTop="20dp"
-            android:layout_below="@+id/recycler_view_paired_devices"
             android:layout_height="2dp"
-            android:background="#c0c0c0"/>
+            android:background="#c0c0c0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_view_paired_devices" />
 
 
         <TextView
             android:id="@+id/available_txt"
-            android:layout_below="@+id/line"
             android:text="Available Devices"
             android:layout_marginTop="20dp"
             android:textColor="#90caf9"
             android:textSize="25dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/line" />
 
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view_found_devices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/available_txt"
-            android:scrollbars="vertical"/>
+            android:scrollbars="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/available_txt" />
         <Button
             android:id="@+id/refresh"
             android:text="refresh"
             android:layout_marginTop="20dp"
             android:background="#64b5f6"
-            android:layout_below="@+id/recycler_view_found_devices"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_view_found_devices" />
 
-    </RelativeLayout>
-</RelativeLayout>
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:id="@+id/progressBar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:indeterminate="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/refresh" />
+
+</android.support.constraint.ConstraintLayout>
 
 </ScrollView>

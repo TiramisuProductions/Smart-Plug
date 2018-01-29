@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +35,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.jar.*;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 import smartplug.app.myapplication.Adapters.FoundDeviceAdapter;
 import smartplug.app.myapplication.Adapters.PairedDevicesAdapter;
@@ -58,7 +61,8 @@ public class BluetoothDevices extends AppCompatActivity {
     BluetoothDevice device;
     public static String EXTRA_DEVICE_ADDRESS = "device_address";
     public ArrayList<BluetoothDevice> ADlist = new ArrayList<>();
-
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     int signal;
 
@@ -71,15 +75,14 @@ public class BluetoothDevices extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_devices);
         EventBus.getDefault().register(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Available Devices");
-        setSupportActionBar(toolbar);
         db = FirebaseFirestore.getInstance();
         refes = (Button) findViewById(R.id.refresh);
-
+        ButterKnife.bind(this);
+        progressBar.setVisibility(View.VISIBLE);
         refes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
                 if (myBluetooth.isDiscovering()) {
                     myBluetooth.cancelDiscovery();
                 }
@@ -162,6 +165,7 @@ public class BluetoothDevices extends AppCompatActivity {
 
             @Override
             public void onReceive(Context context, Intent intent) {
+                progressBar.setVisibility(View.VISIBLE);
                 signal = 0;
                 String action = intent.getAction();
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
@@ -188,6 +192,7 @@ public class BluetoothDevices extends AppCompatActivity {
                 recyclerViewFoundDevices.setItemAnimator(new DefaultItemAnimator());
                 recyclerViewFoundDevices.removeAllViews();
                 recyclerViewFoundDevices.setAdapter(foundDeviceAdapter);
+                progressBar.setVisibility(View.INVISIBLE);
             }
         };
 

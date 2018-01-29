@@ -42,7 +42,7 @@
                     android:textStyle="bold" />
             </RelativeLayout>
 
-            <RelativeLayout
+            <android.support.constraint.ConstraintLayout
                 android:id="@+id/relativelayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,68 +59,77 @@
                     android:text="Email Id"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <EditText
                     android:id="@+id/username_ed"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/txtusername"
                     android:layout_marginTop="10dp"
-                    android:textSize="20dp" />
+                    android:textSize="20dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/txtusername" />
 
                 <TextView
                     android:id="@+id/txtpassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/username_ed"
                     android:layout_marginTop="10dp"
                     android:text="Password"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/username_ed" />
 
                 <EditText
                     android:id="@+id/password_ed"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/txtpassword"
                     android:layout_marginTop="10dp"
                     android:inputType="textPassword"
-                    android:textSize="20dp" />
+                    android:textSize="20dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/txtpassword" />
 
                 <Button
                     android:id="@+id/login_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/password_ed"
-                    android:layout_centerHorizontal="true"
                     android:layout_marginTop="30dp"
                     android:background="@color/colorPrimary"
                     android:text="Login"
                     android:textColor="@color/white"
                     android:textSize="12dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="@+id/password_ed"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
 
                 <com.google.android.gms.common.SignInButton
                     android:id="@+id/sign_in_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/login_btn"
-                    android:layout_marginTop="30dp" />
+                    android:layout_marginTop="30dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/login_btn" />
 
                 <TextView
                     android:id="@+id/signup_txt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/sign_in_button"
-                    android:layout_centerHorizontal="true"
                     android:layout_marginTop="20dp"
-                    android:text="Sign Up here"
+                    android:textSize="18sp"
+                    android:text="Make An Account !"
                     android:textColor="@color/colorPrimary"
-                    android:textStyle="bold|italic" />
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="@+id/sign_in_button"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
 
-            </RelativeLayout>
+            </android.support.constraint.ConstraintLayout>
         </RelativeLayout>
     </ScrollView>
 </RelativeLayout>

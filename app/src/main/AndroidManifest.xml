@@ -37,8 +37,8 @@
         <activity
             android:name=".BluetoothDevices"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".BluetoothDevices2" />
-        <activity android:name=".ConnectToBluetoothActivity"></activity>
+        <activity android:name=".ConnectToBluetoothActivity" />
+        <activity android:name=".NewUserRegistration"></activity>
     </application>
 
 </manifest>
