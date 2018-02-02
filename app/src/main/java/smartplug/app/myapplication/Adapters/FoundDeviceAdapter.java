@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,10 +19,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import de.greenrobot.event.EventBus;
 import smartplug.app.myapplication.Adapters.FoundDeviceAdapter;
 import smartplug.app.myapplication.BluetoothDevices;
+import smartplug.app.myapplication.EventBusEvent;
 import smartplug.app.myapplication.Models.FoundDevices;
 
 import smartplug.app.myapplication.R;
@@ -37,18 +41,24 @@ public class FoundDeviceAdapter extends
 
     Context context;
     ArrayList<BluetoothDevice> foundDevicelist = new ArrayList<>();
+    BluetoothDevice pairedBluetoothDevice;
 
-
-
+    @Override
+    public void onBindViewHolder(MyViewHolderF holder, int position, List<Object> payloads) {
+        super.onBindViewHolder(holder, position, payloads);
+    }
 
     public class MyViewHolderF extends RecyclerView.ViewHolder {
-        TextView Dname, Daddress;
+        TextView Dname;
+        Button connect;
 
         public MyViewHolderF(View itemView) {
             super(itemView);
 
-            Dname = (TextView) itemView.findViewById(R.id.device_nameF);
-            Daddress = (TextView) itemView.findViewById(R.id.device_addressF);
+            Dname = (TextView) itemView.findViewById(R.id.deviceName);
+
+            connect = (Button)itemView.findViewById(R.id.connect);
+
         }
     }
 
@@ -71,8 +81,8 @@ public class FoundDeviceAdapter extends
 
         final BluetoothDevice fd = foundDevicelist.get(position);
         holder.Dname.setText(fd.getName());
-        holder.Daddress.setText(fd.getAddress());
-        holder.Dname.setOnClickListener(new View.OnClickListener() {
+       // holder.Daddress.setText(fd.getAddress());
+        holder.connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(context, fd.getAddress(), Toast.LENGTH_SHORT).show();
@@ -84,7 +94,9 @@ public class FoundDeviceAdapter extends
                         try {
                             Method method = device.getClass().getMethod("createBond", (Class[]) null);
                             Toast.makeText(context, "Pairing...", Toast.LENGTH_SHORT).show();
+                            pairedBluetoothDevice = device;
                             method.invoke(device, (Object[]) null);
+
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -109,6 +121,7 @@ public class FoundDeviceAdapter extends
                 final int prevState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
 
                 if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
+                    EventBus.getDefault().post(new EventBusEvent("Hello EventBus!",pairedBluetoothDevice));
                     Toast.makeText(context, "Paired", Toast.LENGTH_LONG).show();
                 } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
                     Toast.makeText(context, "Unpaired", Toast.LENGTH_LONG).show();

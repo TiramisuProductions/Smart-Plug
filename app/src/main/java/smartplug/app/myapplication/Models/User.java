@@ -9,6 +9,9 @@ public class User {
     String name;
     boolean hasDevices;
 
+    public User() {
+    }
+
     public User(String email, String name, boolean hasDevices) {
         this.email = email;
         this.name = name;

@@ -3,17 +3,42 @@ package smartplug.app.myapplication;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.github.florent37.viewanimator.AnimationListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.mikhaellopez.circularprogressbar.CircularProgressBar;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import smartplug.app.myapplication.Models.Device;
+import smartplug.app.myapplication.Models.User;
 
 public class ConnectToBluetoothActivity extends AppCompatActivity {
     Handler bluetoothIn;
@@ -22,9 +47,15 @@ public class ConnectToBluetoothActivity extends AppCompatActivity {
     private BluetoothAdapter btAdapter = null;
     private BluetoothSocket btSocket = null;
     private StringBuilder recDataString = new StringBuilder();
-
+    @BindView(R.id.progressBar)
+    CircularProgressBar progressBar;
     private ConnectedThread mConnectedThread;
-
+    private int stage;
+    @BindView(R.id.led)
+    ImageView led;
+     int animationDuration = 2500;
+     String deviceId ="";
+     FirebaseFirestore db = FirebaseFirestore.getInstance();
     // SPP UUID service - this should work for most devices
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -34,19 +65,143 @@ public class ConnectToBluetoothActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_to_bluetooth);
-
+        ButterKnife.bind(this);
+        stage=1;
+        ledAnimation();
+       // 2500ms = 2,5s
+        progressBar.setProgressWithAnimation(30, animationDuration);
         bluetoothIn = new Handler() {
             public void handleMessage(android.os.Message msg) {
-                if (msg.what == handlerState) {										//if message is what we want
+                if (msg.what == handlerState) {                                        //if message is what we want
                     String readMessage = (String) msg.obj;
-                    Log.d("wow",readMessage);// msg.arg1 = bytes from connect thread
-
+                    Log.d("wow", readMessage);// msg.arg1 = bytes from connect thread
+                    recDataString.append(readMessage);                                      //keep appending to string until ~
+                    int endOfLineIndex = recDataString.indexOf("~");                    // determine the end-of-line
+                    if (endOfLineIndex > 0) {                                           // make sure there data before ~
+                        String dataInPrint = recDataString.substring(0, endOfLineIndex);    // extract string
+                        Log.d("hoola", dataInPrint);
+                        if(stage==1){
+                            deviceId=dataInPrint;
+                        }
+                        int dataLength = dataInPrint.length();                          //get length of data received
+                        Log.d("Length", "" + dataLength);
+                        recDataString.delete(0, recDataString.length());                    //clear all string data
+                        // strIncom =" ";
+                        handleStage();
+                    }
                 }
-                }
-
+            }
         };
         btAdapter = BluetoothAdapter.getDefaultAdapter();
         checkBTState();
+    }
+
+    private void ledAnimation(){
+        com.github.florent37.viewanimator.ViewAnimator.animate(led).fadeIn().thenAnimate(led).fadeOut().start().onStop(new AnimationListener.Stop() {
+            @Override
+            public void onStop() {
+                ledAnimation();
+            }
+        });
+    }
+
+    private void handleStage(){
+        switch (stage){
+            case 1:
+                stage=2;
+                progressBar.setProgressWithAnimation(45, animationDuration);
+                checkIfFirstDevice();
+                break;
+            case 2:
+                stage = 3;
+                progressBar.setProgressWithAnimation(60, animationDuration);
+addFirestDevice();
+break;
+            case 3:
+                Log.d("reached here","reched here");
+                progressBar.setProgressWithAnimation(100, animationDuration);
+                SendResponse();
+              break;
+        }
+    }
+
+    private void checkIfFirstDevice() {
+        Log.d("UID",FirebaseAuth.getInstance().getUid());
+        db.collection("flash").document(FirebaseAuth.getInstance().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+Log.d("hello",documentSnapshot.getData().toString());
+User user = documentSnapshot.toObject(User.class);
+if(!user.isHasDevices())
+{
+    handleStage();
+}
+else{
+
+}
+            }
+        });
+    }
+
+    private void SendResponse(){
+        mConnectedThread.write("1");
+    }
+
+    private void addFirestDevice(){
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText input = new EditText(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        builder.setTitle("What Would you like to name your device");
+        builder.setView(input);
+        builder.setPositiveButton("Done",null);
+        builder.setNegativeButton("Cancel",null);
+        builder.setCancelable(false);
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        // TODO Do something
+                        if(input.getText().toString().equals("")){
+                            input.setError("Enter a name");
+                        }
+                        else {
+                            Device device = new Device(deviceId,input.getText().toString(),false);
+                            db.collection("flash").document(FirebaseAuth.getInstance().getUid()).collection("devices").add(device).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                               db.collection("flash").document(FirebaseAuth.getInstance().getUid()).update("hasDevices",true).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                   @Override
+                                   public void onSuccess(Void aVoid) {
+                                       handleStage();
+                                   }
+                               });
+                                }
+                            });
+                            alert.dismiss();
+                        }
+
+                    }
+                });
+                Button n = alert.getButton(AlertDialog.BUTTON_NEGATIVE);
+                n.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alert.dismiss();
+                    }
+                });
+
+            }
+        });
+
+        alert.show();
     }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
@@ -116,7 +271,7 @@ public class ConnectToBluetoothActivity extends AppCompatActivity {
 
         //I send a character when resuming.beginning transmission to check device is connected
         //If it is not an exception will be thrown in the write method and finish() will be called
-        mConnectedThread.write("1");
+        mConnectedThread.write("REQUEST_DEVICE_ID\n");
     }
 
     private class ConnectedThread extends Thread {

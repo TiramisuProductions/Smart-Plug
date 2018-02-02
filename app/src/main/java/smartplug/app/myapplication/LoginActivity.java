@@ -3,6 +3,7 @@ package smartplug.app.myapplication;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -55,9 +56,9 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseUser user;
 
     private SignInButton signin;
-    private Button login;
-    private EditText Uname, Pass;
-    private TextView signup;
+    @BindView(R.id.email) TextInputEditText emailEditText;
+    @BindView(R.id.password) TextInputEditText passwordEditText;
+    @BindView(R.id.logIn) Button loginButton;
     private ProgressDialog progressDialog;
     private FirebaseFirestore db;
     public static String name = "name";
@@ -65,14 +66,11 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login3);
         ButterKnife.bind(this);
 
         signin = (SignInButton) findViewById(R.id.sign_in_button);
-        login = (Button) findViewById(R.id.login_btn);
-        Uname = (EditText) findViewById(R.id.username_ed);
-        Pass = (EditText) findViewById(R.id.password_ed);
-        signup = (TextView) findViewById(R.id.signup_txt);
+
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
@@ -95,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        login.setOnClickListener(new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                  loginUser();
@@ -103,17 +101,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        signup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-            }
-        });
+
     }
 
     public void loginUser(){
-        String email = Uname.getText().toString();
-        final String password = Pass.getText().toString();
+        String email = emailEditText.getText().toString();
+        final String password = passwordEditText.getText().toString();
 
         if (TextUtils.isEmpty(email)) {
             Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();

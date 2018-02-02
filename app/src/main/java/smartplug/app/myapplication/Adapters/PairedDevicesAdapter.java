@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,13 +51,14 @@ public class PairedDevicesAdapter extends RecyclerView.Adapter<PairedDevicesAdap
     Context rootViewContext;
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
-        TextView Dname, Daddress;
+        TextView Dname;
+        Button connectButton;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
-            Dname = (TextView)itemView.findViewById(R.id.device_name);
-            Daddress = (TextView)itemView.findViewById(R.id.device_address);
+            Dname = (TextView)itemView.findViewById(R.id.deviceName);
+            connectButton = (Button)itemView.findViewById(R.id.connect);
         }
     }
 
@@ -78,8 +80,7 @@ public class PairedDevicesAdapter extends RecyclerView.Adapter<PairedDevicesAdap
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         final BluetoothDevice pd = pairedDevicelist.get(position);
         holder.Dname.setText(pd.getName());
-        holder.Daddress.setText(pd.getAddress());
-        holder.Dname.setOnClickListener(new View.OnClickListener() {
+        holder.connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(context, ""+pd.getName(), Toast.LENGTH_LONG).show();

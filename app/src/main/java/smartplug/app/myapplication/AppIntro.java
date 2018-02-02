@@ -45,7 +45,8 @@ public class AppIntro extends IntroActivity {
                 .background(R.color.lightgrey)
                 .backgroundDark(R.color.colorPrimary)
                 .scrollable(false)
-                .permission(Manifest.permission.CAMERA)
+                .permission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                .permission(Manifest.permission.ACCESS_FINE_LOCATION)
                 .build());
 
 
