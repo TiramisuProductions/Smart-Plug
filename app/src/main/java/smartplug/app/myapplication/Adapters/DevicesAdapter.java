@@ -9,8 +9,15 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.google.gson.JsonObject;
+import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
+
 import java.util.ArrayList;
 
+import smartplug.app.myapplication.FlashApplication;
 import smartplug.app.myapplication.Models.Device;
 import smartplug.app.myapplication.Models.FoundDevices;
 import smartplug.app.myapplication.R;
@@ -22,10 +29,12 @@ import smartplug.app.myapplication.R;
 public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.MyViewHolderF> {
     Context context;
     ArrayList<Device> devicesList = new ArrayList<>();
+    PubNub pubnub = new PubNub(FlashApplication.pnConfiguration);
 
     public DevicesAdapter(Context context, ArrayList<Device> devicesList) {
         this.context = context;
         this.devicesList = devicesList;
+
     }
 
     @Override
@@ -37,7 +46,7 @@ public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.MyViewHo
     }
 
     @Override
-    public void onBindViewHolder(final MyViewHolderF holder, int position) {
+    public void onBindViewHolder(final MyViewHolderF holder,final  int position) {
 
 holder.deviceName.setText(devicesList.get(position).getName());
 
@@ -45,10 +54,17 @@ if(devicesList.get(position).isStatus())
 {
     holder.deviceStatus.setChecked(true);
     holder.deviceStatus.setText("On");
+    JsonObject values = new JsonObject();
+    values.addProperty("status", 1);
+
+
+
+
 }
 else{
     holder.deviceStatus.setChecked(false);
     holder.deviceStatus.setText("Off");
+
 }
 holder.deviceStatus.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
     @Override
@@ -56,9 +72,45 @@ holder.deviceStatus.setOnCheckedChangeListener(new CompoundButton.OnCheckedChang
         if(b)
         {
            holder.deviceStatus.setText("On");
+            JsonObject values = new JsonObject();
+            values.addProperty("status", 1);
+
+
+            pubnub.publish()
+                    .message(values)
+                    .channel(devicesList.get(position).getDeviceId())
+                    .async(new PNCallback<PNPublishResult>() {
+                        @Override
+                        public void onResponse(PNPublishResult result, PNStatus status) {
+                            // handle publish result, status always present, result if successful
+                            // status.isError() to see if error happened
+                            if(!status.isError()) {
+                                System.out.println("pub timetoken: " + result.getTimetoken());
+                            }
+                            System.out.println("pub status code: " + status.getStatusCode());
+                        }
+                    });
         }
         else {
             holder.deviceStatus.setText("Off");
+            JsonObject values = new JsonObject();
+            values.addProperty("status", 0);
+
+
+            pubnub.publish()
+                    .message(values)
+                    .channel(devicesList.get(position).getDeviceId())
+                    .async(new PNCallback<PNPublishResult>() {
+                        @Override
+                        public void onResponse(PNPublishResult result, PNStatus status) {
+                            // handle publish result, status always present, result if successful
+                            // status.isError() to see if error happened
+                            if(!status.isError()) {
+                                System.out.println("pub timetoken: " + result.getTimetoken());
+                            }
+                            System.out.println("pub status code: " + status.getStatusCode());
+                        }
+                    });
         }
     }
 });

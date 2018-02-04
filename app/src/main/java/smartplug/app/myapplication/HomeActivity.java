@@ -1,29 +1,23 @@
 package smartplug.app.myapplication;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,10 +26,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -44,121 +36,93 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import smartplug.app.myapplication.Adapters.DevicesAdapter;
-import smartplug.app.myapplication.Adapters.PairedDevicesAdapter;
 import smartplug.app.myapplication.Models.Device;
+import smartplug.app.myapplication.Models.User;
 import smartplug.app.myapplication.fragments.MyDevicesFragment;
 import smartplug.app.myapplication.fragments.StatisticsFragment;
 import smartplug.app.myapplication.fragments.TimerFragment;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-
-    private static final int REQUEST_CODE_BLUETOOTH_ON = 1313;
-    private ProgressDialog deviceDialog;
-    FirebaseFirestore db;
-    FirebaseAuth auth1;
-Fragment fragment;
-    Toolbar toolbar;
-
-    private NavigationView navigationView;
+    private ProgressDialog progressDialog;
+    FirebaseAuth auth;
+    Fragment fragment;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.nav_view) NavigationView navigationView;
+    @BindView(R.id.devices) RecyclerView devicesRecylerView;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    private  TextView nameHeader;
+    private  TextView emailHeader;
     private View navHeader;
-    private TextView nameHeader, emailHeader;
-     @BindView(R.id.devices)
-    RecyclerView devicesRecylerView;
-    /** private ArrayList<Device> deviceList = new ArrayList<>();
-     * Bluetooth device discovery time，second。
-     */
-    private static final int BLUETOOTH_DISCOVERABLE_DURATION = 250;
     private DevicesAdapter devicesAdapter;
     public ArrayList<Device> deviceList = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        auth = FirebaseAuth.getInstance();
+        ButterKnife.bind(this);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        navigationView = (NavigationView)findViewById(R.id.nav_view);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("My Devices");
         navHeader = navigationView.getHeaderView(0);
         nameHeader = (TextView)navHeader.findViewById(R.id.username_nav_header);
         emailHeader = (TextView)navHeader.findViewById(R.id.email_nav_header);
-        ButterKnife.bind(this);
-        setSupportActionBar(toolbar);
-
-        db = FirebaseFirestore.getInstance();
-        auth1 = FirebaseAuth.getInstance();
-
-toolbar.setTitle("My Devices");
-
-
-        nameHeader.setText(auth1.getCurrentUser().getDisplayName());
-        emailHeader.setText(auth1.getCurrentUser().getEmail());
-
-        //displayFirstTimeUserDialog();
-        deviceList();
-
-
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        nameHeader.setText(auth.getCurrentUser().getDisplayName());
+        emailHeader.setText(auth.getCurrentUser().getEmail());
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
         fragment = new MyDevicesFragment();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.content_home, fragment);
         ft.commit();
-
-
+        deviceList();
 
     }
 
 
     public void deviceList() {
-        deviceDialog = new ProgressDialog(this);
-        deviceDialog.setMessage("Getting Your Devices");
-        deviceDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        deviceDialog.setIndeterminate(false);
-        deviceDialog.setProgressNumberFormat(null);
-        deviceDialog.setProgressPercentFormat(null);
-        deviceDialog.setCancelable(false);
-        deviceDialog.show();
+        //function on how to get device list
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Getting Your Devices");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setIndeterminate(false);
+        progressDialog.setProgressNumberFormat(null);
+        progressDialog.setProgressPercentFormat(null);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
-        db.collection("flash").document(auth1.getUid()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        FlashApplication.userRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
-                Log.d("hola", documentSnapshot.getData().get("hasDevices").toString());
-                if (Boolean.valueOf(documentSnapshot.getData().get("hasDevices").toString()) == false) {
-                    deviceDialog.cancel();
+                if (!documentSnapshot.toObject(User.class).isHasDevices()) {
+                    progressDialog.cancel();
                     displayFirstTimeUserDialog();
 
                 }
                 else {
-                    db.collection("flash").document(FirebaseAuth.getInstance().getUid()).collection("devices")
+                    FlashApplication.devicesRef
                             .get()
                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     if (task.isSuccessful()) {
                                         for (DocumentSnapshot document : task.getResult()) {
-                                            Log.d("flashdevices", document.getId() + " => " + document.getData());
                                             Device device = document.toObject(Device.class);
-                                            Log.d("flashdevices 2 ", device.getName());
                                             deviceList.add(device);
                                         }
-                                        deviceDialog.cancel();
+                                        progressDialog.cancel();
                                         devicesAdapter = new DevicesAdapter(HomeActivity.this, deviceList);
                                         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(HomeActivity.this);
                                         devicesRecylerView.setLayoutManager(mLayoutManager);
                                         devicesRecylerView.setItemAnimator(new DefaultItemAnimator());
                                         devicesRecylerView.setAdapter(devicesAdapter);
                                     } else {
-                                        Log.d("flashdevices", "Error getting documents: ", task.getException());
+
                                     }
                                 }
                             });
@@ -265,7 +229,7 @@ toolbar.setTitle("My Devices");
 
         }
         else if(id==R.id.nav_logout){
-            auth1.signOut();
+            auth.signOut();
             startActivity(new Intent(this,MainActivity.class));
         }
 

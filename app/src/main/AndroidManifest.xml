@@ -2,14 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="smartplug.app.myapplication">
 
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
+        android:name=".FlashApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -38,7 +38,8 @@
             android:name=".BluetoothDevices"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity android:name=".ConnectToBluetoothActivity" />
-        <activity android:name=".NewUserRegistration"></activity>
+        <activity android:name=".NewUserRegistration" />
+        <activity android:name=".DevicePairingDone"></activity>
     </application>
 
 </manifest>

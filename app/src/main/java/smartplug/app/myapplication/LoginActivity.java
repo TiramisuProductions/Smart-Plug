@@ -51,14 +51,12 @@ public class LoginActivity extends AppCompatActivity {
 
     int RC_SIGN_IN = 7;
     GoogleSignInClient mGoogleSignInClient;
-
     FirebaseAuth auth;
     FirebaseUser user;
-
-    private SignInButton signin;
     @BindView(R.id.email) TextInputEditText emailEditText;
     @BindView(R.id.password) TextInputEditText passwordEditText;
     @BindView(R.id.logIn) Button loginButton;
+    @BindView(R.id.sign_in_button) SignInButton signin;
     private ProgressDialog progressDialog;
     private FirebaseFirestore db;
     public static String name = "name";
@@ -68,9 +66,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login3);
         ButterKnife.bind(this);
-
-        signin = (SignInButton) findViewById(R.id.sign_in_button);
-
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
@@ -187,7 +182,7 @@ public class LoginActivity extends AppCompatActivity {
     private void checkIfUserExist(String email){
         progressDialog.show();
         progressDialog.setMessage("Verifying...");
-        db.collection("flash")
+        FlashApplication.rootRef
                 .whereEqualTo("email",email)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -213,7 +208,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d("cola1", "firebaseAuthWithGoogle:" + acct.getId());
+
 
         //getting the auth credential
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -224,7 +219,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d("cola2", "signInWithCredential:success");
+
                             user = auth.getCurrentUser();
                            // progressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "User Signed In\n" + user.getUid()
@@ -237,7 +232,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w("cola3", "signInWithCredential:failure", task.getException());
+
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
 

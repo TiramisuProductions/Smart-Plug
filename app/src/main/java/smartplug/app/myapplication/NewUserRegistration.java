@@ -70,7 +70,7 @@ public class NewUserRegistration extends AppCompatActivity {
 
 
 
-        db.collection("flash").document(auth.getUid())
+        FlashApplication.userRef
                 .set(user)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

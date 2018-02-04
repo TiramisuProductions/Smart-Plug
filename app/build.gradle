@@ -45,5 +45,6 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     implementation 'com.android.support:design:27.0.2'
     compile 'com.github.florent37:viewanimator:1.0.5'
+    compile group: 'com.pubnub', name: 'pubnub-gson', version: '4.18.0'
 }
 apply plugin: 'com.google.gms.google-services'

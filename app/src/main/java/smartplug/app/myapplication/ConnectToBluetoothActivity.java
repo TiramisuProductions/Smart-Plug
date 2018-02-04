@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.florent37.viewanimator.AnimationListener;
@@ -41,7 +41,7 @@ import smartplug.app.myapplication.Models.Device;
 import smartplug.app.myapplication.Models.User;
 
 public class ConnectToBluetoothActivity extends AppCompatActivity {
-    Handler bluetoothIn;
+    static Handler bluetoothIn;
 
     final int handlerState = 0;        				 //used to identify handler message
     private BluetoothAdapter btAdapter = null;
@@ -51,11 +51,17 @@ public class ConnectToBluetoothActivity extends AppCompatActivity {
     CircularProgressBar progressBar;
     private ConnectedThread mConnectedThread;
     private int stage;
+    private boolean firstDevice;
     @BindView(R.id.led)
     ImageView led;
-     int animationDuration = 2500;
-     String deviceId ="";
-     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    @BindView(R.id.done) Button doneButton;
+    @BindView(R.id.status)
+    TextView status;
+    @BindView(R.id.error) ImageView errorButton;
+    int animationDuration = 2500;
+    boolean finalAcknowlegement = false;
+    String deviceId ="";
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     // SPP UUID service - this should work for most devices
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -66,9 +72,21 @@ public class ConnectToBluetoothActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_to_bluetooth);
         ButterKnife.bind(this);
+        status.setText("Configuring Flash Device");
         stage=1;
         ledAnimation();
-       // 2500ms = 2,5s
+
+        doneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent newIntent = new Intent(ConnectToBluetoothActivity.this,HomeActivity.class);
+                newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(newIntent);
+            }
+        });
+
+        // 2500ms = 2,5s
         progressBar.setProgressWithAnimation(30, animationDuration);
         bluetoothIn = new Handler() {
             public void handleMessage(android.os.Message msg) {
@@ -82,12 +100,19 @@ public class ConnectToBluetoothActivity extends AppCompatActivity {
                         Log.d("hoola", dataInPrint);
                         if(stage==1){
                             deviceId=dataInPrint;
+                            handleStage();
+                        }
+                        else {
+                            if (dataInPrint.equals("1")) {
+                                handleStage();
+                                Log.d("reached",""+stage);
+                            }
                         }
                         int dataLength = dataInPrint.length();                          //get length of data received
                         Log.d("Length", "" + dataLength);
                         recDataString.delete(0, recDataString.length());                    //clear all string data
                         // strIncom =" ";
-                        handleStage();
+                        //handleStage();
                     }
                 }
             }
@@ -110,44 +135,48 @@ public class ConnectToBluetoothActivity extends AppCompatActivity {
             case 1:
                 stage=2;
                 progressBar.setProgressWithAnimation(45, animationDuration);
-                checkIfFirstDevice();
+                status.setText("Processing...");
+                deviceValidationFirebase();
                 break;
             case 2:
                 stage = 3;
+                status.setText("Just 1 Second..");
                 progressBar.setProgressWithAnimation(60, animationDuration);
-addFirestDevice();
-break;
+                addDevice();
+                break;
             case 3:
-                Log.d("reached here","reched here");
+                doneButton.setVisibility(View.VISIBLE);
+                status.setText("Sucessfully Setted Up...");
                 progressBar.setProgressWithAnimation(100, animationDuration);
-                SendResponse();
-              break;
+
+                break;
         }
     }
 
-    private void checkIfFirstDevice() {
-        Log.d("UID",FirebaseAuth.getInstance().getUid());
-        db.collection("flash").document(FirebaseAuth.getInstance().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+    private void deviceValidationFirebase() {
+
+        FlashApplication.userRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-Log.d("hello",documentSnapshot.getData().toString());
-User user = documentSnapshot.toObject(User.class);
-if(!user.isHasDevices())
-{
-    handleStage();
-}
-else{
-
-}
+                User user = documentSnapshot.toObject(User.class);
+                if(!user.isHasDevices())
+                {
+                    firstDevice = true;
+                    handleStage();
+                }
+                else{
+                    firstDevice = false;
+                    handleStage();
+                }
             }
         });
     }
 
     private void SendResponse(){
-        mConnectedThread.write("1");
+        mConnectedThread.write("ACCEPTING_CHANNEL_TAG"+"~");
     }
 
-    private void addFirestDevice(){
+    private void addDevice(){
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final EditText input = new EditText(this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -160,6 +189,27 @@ else{
         builder.setNegativeButton("Cancel",null);
         builder.setCancelable(false);
         final AlertDialog alert = builder.create();
+        FlashApplication.devicesRef
+                .whereEqualTo("deviceId", deviceId)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().size() > 0) {
+                                status.setText("Flash Device Already Linked !");
+                                errorButton.setVisibility(View.VISIBLE);
+                                doneButton.setText("Abort");
+                                doneButton.setVisibility(View.VISIBLE);
+
+
+                            } else {
+                                alert.show();
+                            }
+                        }
+                    }
+                });
+
         alert.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
@@ -169,40 +219,58 @@ else{
                     @Override
                     public void onClick(View view) {
                         // TODO Do something
-                        if(input.getText().toString().equals("")){
+                        if (input.getText().toString().equals("")) {
                             input.setError("Enter a name");
-                        }
-                        else {
-                            Device device = new Device(deviceId,input.getText().toString(),false);
-                            db.collection("flash").document(FirebaseAuth.getInstance().getUid()).collection("devices").add(device).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                               db.collection("flash").document(FirebaseAuth.getInstance().getUid()).update("hasDevices",true).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                   @Override
-                                   public void onSuccess(Void aVoid) {
-                                       handleStage();
-                                   }
-                               });
-                                }
-                            });
+                        } else {
+                            Device device = new Device(deviceId, input.getText().toString(), false);
+                            if (firstDevice) {
+                                FlashApplication.devicesRef.add(device).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    @Override
+                                    public void onSuccess(DocumentReference documentReference) {
+
+                                        FlashApplication.userRef.update("hasDevices", true).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                SendResponse();
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                FlashApplication.devicesRef.add(device).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    @Override
+                                    public void onSuccess(DocumentReference documentReference) {
+
+                                        SendResponse();
+                                    }
+                                });
+                            }
+
+
                             alert.dismiss();
+
+
                         }
 
-                    }
-                });
-                Button n = alert.getButton(AlertDialog.BUTTON_NEGATIVE);
-                n.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        alert.dismiss();
+                        Button n = alert.getButton(AlertDialog.BUTTON_NEGATIVE);
+                        n.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                alert.dismiss();
+                            }
+                        });
+
                     }
                 });
 
-            }
-        });
 
-        alert.show();
+            }}
+
+        );
+
+
     }
+
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
 
@@ -271,7 +339,7 @@ else{
 
         //I send a character when resuming.beginning transmission to check device is connected
         //If it is not an exception will be thrown in the write method and finish() will be called
-        mConnectedThread.write("REQUEST_DEVICE_ID\n");
+        mConnectedThread.write("REQUEST_DEVICE_ID~");
     }
 
     private class ConnectedThread extends Thread {
